@@ -5,6 +5,8 @@
 ;; ones supported by gme
 ;;------------------------------------------------
 
+(require 'sdl2-mixer)
+
 (defun gmecount ()
   "returns the number of tracks on file"
   (with-foreign-object (ggme :pointer)
@@ -114,7 +116,7 @@
 ;;(sdl2-mixer:allocate-channels 2)
 ;;(sdl2-mixer:play-channel 0 (are)  0)
 
-(sdl2-mixer:open-audio 44100 :s16sys 2 500)
+;;(sdl2-mixer:open-audio 44100 :s16sys 2 500)
 
 ;; allocate chunk
 ;;(c-with ((mychunk sdl2-ffi:mix-chunk)) (mychunk :allocated))
