@@ -305,3 +305,14 @@
 (cffi:defcfun ("gme_set_user_cleanup" gme_set_user_cleanup) :void
   (arg0 :pointer)
   (func :pointer))
+
+
+;; --------------------------------------------------
+;; END OF Swig
+
+(defmacro with-open ((var filename &key (rate 44100)) &body body)
+  `(cffi:with-foreign-string (cffi-filename ,filename)
+     (cffi:with-foreign-object (,var :pointer)
+       (gme_open_file cffi-filename ,var ,rate)
+       (unwind-protect (progn ,@body)
+         (gme_delete (mem-ref ,var :pointer))))))
