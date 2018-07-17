@@ -85,7 +85,7 @@ always the same value"
          (if (equal 0 (sdl2-mixer:playing 0))
              (progn
                (incf i)
-               (when (> i loop) (return))
+               (when (> i loops) (return))
                (gme_play (mem-ref ggme :pointer) buff-size array)
                (sdl2-mixer:play-channel 0 mychunk 0))
              ;; needs to be smaaaall (.0001), and even so the glitch is audible
@@ -104,7 +104,7 @@ always the same value"
   ;;(c-with ((mychunk sdl2-ffi:mix-chunk)) (mychunk :allocated))
   )
 
-
+;; Trying to write to a .txt as an attempt to make it available to incudine
 (defun gmerecord (&optional (track-number 0) (buff-size 500) (loops 1)
                     (mute-voices '()))
   (with-open (ggme *nsf-file-path*)
@@ -114,8 +114,27 @@ always the same value"
         (loop :for voice :in mute-voices
            :do (gme_mute_voice (mem-ref ggme :pointer) voice 1)))        
       ;; CHUNKS!!!
-      (with-open-file (f "/home/sendai/out.txt" :direction :output :if-exists :supersede)
+      (with-open-file
+          (f "/home/sendai/out.txt" :direction :output :if-exists :supersede)
         (gme_play (mem-ref ggme :pointer) buff-size array)
         (dotimes (i buff-size)
           (write-line (format nil "~F" (mem-aref array :short i))
                       f))))))
+
+;; --------------------------------------------------
+
+(defvar *arr* nil)
+(defun gmevector (&optional (track-number 0) (buff-size 500) (loops 1)
+                    (mute-voices '()))
+  (setf *arr* (make-array buff-size :element-type 'single-float))
+  (with-open (ggme *nsf-file-path*)
+    (with-foreign-object (array :short buff-size)
+      (gme_start_track (mem-ref ggme :pointer) track-number)
+      (when mute-voices
+        (loop :for voice :in mute-voices
+           :do (gme_mute_voice (mem-ref ggme :pointer) voice 1)))        
+      ;; CHUNKS!!!
+      (gme_play (mem-ref ggme :pointer) buff-size array)
+      (dotimes (i buff-size)
+        (setf (aref *arr* i)
+              (float (mem-aref array :short i)))))))
