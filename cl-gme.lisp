@@ -316,3 +316,12 @@
        (gme_open_file cffi-filename ,var ,rate)
        (unwind-protect (progn ,@body)
          (gme_delete (mem-ref ,var :pointer))))))
+
+(defmacro with-track ((var filename track
+                           &key (rate 44100)) &body body)
+  `(cffi:with-foreign-string (cffi-filename ,filename)
+     (cffi:with-foreign-object (,var :pointer)
+       (gme_open_file cffi-filename ,var ,rate)
+       (gme_start_track (mem-ref ,var :pointer) ,track)
+       (unwind-protect (progn ,@body)
+         (gme_delete (mem-ref ,var :pointer))))))
