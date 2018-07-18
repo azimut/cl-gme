@@ -51,48 +51,34 @@ always the same value"
 ;; sometimes it works ok-ish, but really bad in comparison to big buffers
 ;; multiples of 44100
 ;; still sucks...I think I just need to have the read/write part happen at a lower level
-(defun gmeplay (&optional (track-number 0) (buff-size 500) (loops 1)
+(defun gmeplay (&optional (track-number 0)
+                  (buff-size 500) (loops 1)
                   (mute-voices '()))
-  (with-foreign-objects ((ggme :pointer) (array :short buff-size))
-    (with-foreign-string (ss *nsf-file-path*)
-      (foreign-funcall "gme_open_file"
-                       :string ss
-                       :pointer ggme
-                       :int 44100
-                       :pointer))
-    (foreign-funcall "gme_start_track"
-                     :pointer (mem-ref ggme :pointer)
-                     :int track-number
-                     :pointer)
-    (when mute-voices
-      (loop :for voice :in mute-voices
-         :do
-         (foreign-funcall "gme_mute_voice"
-                          :pointer (mem-ref ggme :pointer)
-                          :int voice
-                          :int 1
-                          :void)))        
-    (sdl2-mixer:open-audio 44100 :s16sys 2 buff-size)
-    (sdl2-mixer:allocate-channels 1)
-    ;; CHUNKS!!!
-    (plus-c:c-with ((mychunk sdl2-ffi:mix-chunk))      
-      (setf (mychunk :volume) 40
-            (mychunk :allocated) 1
-            (mychunk :abuf) array
-            (mychunk :alen) buff-size)
-      (loop :with i = 0
-         :do             
-         (if (equal 0 (sdl2-mixer:playing 0))
-             (progn
-               (incf i)
-               (when (> i loops) (return))
-               (gme_play (mem-ref ggme :pointer) buff-size array)
-               (sdl2-mixer:play-channel 0 mychunk 0))
-             ;; needs to be smaaaall (.0001), and even so the glitch is audible
-             (sleep .01)))
-      (sdl2-mixer:close-audio)
-      (gme_delete (mem-ref ggme :pointer))))
-
+  (with-track (ggme *nsf-file-path* track-number)
+    (with-foreign-objects ((array :short buff-size))
+      (when mute-voices
+        (loop :for voice :in mute-voices
+           :do (gme_mute_voice (mem-ref ggme :pointer) voice 1)))
+      (sdl2-mixer:open-audio 44100 :s16sys 2 buff-size)
+      (sdl2-mixer:allocate-channels 1)
+      ;; CHUNKS!!!
+      (plus-c:c-with ((mychunk sdl2-ffi:mix-chunk))
+        (setf (mychunk :volume) 30
+              (mychunk :allocated) 1
+              (mychunk :abuf) array
+              (mychunk :alen) buff-size)
+        (loop :with i = 0
+           :do
+           (if (equal 0 (sdl2-mixer:playing 0))
+               (progn
+                 (incf i)
+                 (when (> i loops) (return))
+                 (gme_play (mem-ref ggme :pointer) buff-size array)
+                 (sdl2-mixer:play-channel 0 mychunk 0))
+               ;; needs to be smaaaall (.0001),
+               ;; and even so the glitch is audible
+               (sleep .01)))
+        (sdl2-mixer:close-audio))))
   ;; https://www.libsdl.org/projects/SDL_mixer/docs/SDL_mixer.html#SEC11
   ;;(sdl2-mixer:open-audio 44100 :s16sys 2 4096) ;; 4096?
   ;;(sdl2-mixer:allocate-channels 2)
@@ -105,6 +91,7 @@ always the same value"
   )
 
 ;; Trying to write to a .txt as an attempt to make it available to incudine
+;; NOTE: (* .00001 ) if you want to play it elsewhere
 (defun gmerecord (&optional (track-number 0) (buff-size 500) (loops 1)
                     (mute-voices '()))
   (with-open (ggme *nsf-file-path*)
@@ -112,10 +99,12 @@ always the same value"
       (gme_start_track (mem-ref ggme :pointer) track-number)
       (when mute-voices
         (loop :for voice :in mute-voices
-           :do (gme_mute_voice (mem-ref ggme :pointer) voice 1)))        
+           :do (gme_mute_voice (mem-ref ggme :pointer) voice 1)))
       ;; CHUNKS!!!
       (with-open-file
-          (f "/home/sendai/out.txt" :direction :output :if-exists :supersede)
+          (f "/home/sendai/out.txt"
+             :direction :output
+             :if-exists :supersede)
         (gme_play (mem-ref ggme :pointer) buff-size array)
         (dotimes (i buff-size)
           (write-line (format nil "~F" (mem-aref array :short i))
@@ -124,15 +113,17 @@ always the same value"
 ;; --------------------------------------------------
 
 (defvar *arr* nil)
-(defun gmevector (&optional (track-number 0) (buff-size 500) (loops 1)
+;; Used to put the file into a vector, useful for cl-out123
+;; NOTE: (* .00001 ) if you want to play it elsewhere
+(defun gmevector (&optional (track-number 0)
+                    (buff-size 500) (loops 1)
                     (mute-voices '()))
   (setf *arr* (make-array buff-size :element-type 'single-float))
-  (with-open (ggme *nsf-file-path*)
+  (with-track (ggme *nsf-file-path* track-number)
     (with-foreign-object (array :short buff-size)
-      (gme_start_track (mem-ref ggme :pointer) track-number)
       (when mute-voices
         (loop :for voice :in mute-voices
-           :do (gme_mute_voice (mem-ref ggme :pointer) voice 1)))        
+           :do (gme_mute_voice (mem-ref ggme :pointer) voice 1)))
       ;; CHUNKS!!!
       (gme_play (mem-ref ggme :pointer) buff-size array)
       (dotimes (i buff-size)
