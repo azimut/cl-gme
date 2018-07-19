@@ -19,6 +19,9 @@ For example:
 
 ### Earing the output
 On tests.lisp there are several ways to use this.
-* Using [sdl-mix](https://github.com/lispgames/cl-sdl2-mixer) by reading big chunks (reading smaller ones and doing the C>lisp>C conversion resulted in glitches).
-* Using [cl-out123](https://github.com/Shirakumo/cl-out123/) worked fine as far as was tested
-* Using [incudine](https://github.com/titola/incudine) is how I ended up using it. By creating a function that will convert it to a incudine buffer.
+* Using [sdl-mix](https://github.com/lispgames/cl-sdl2-mixer) by reading big chunks (reading smaller ones and doing the C>lisp>C conversion resulted in glitches, might be due using Mix_Chunk, might be using Mix_Musix with the proper C handler it would work better).
+* Using [cl-out123](https://github.com/Shirakumo/cl-out123/) worked fine as far as was tested (not much)
+* Using [incudine](https://github.com/titola/incudine) is how I ended up using it. By creating a function that will convert it to a incudine buffer. Making it C>C>C i think.
+
+# Demo
+There is a flashy and little instructive video showcasing the bindings [here](https://www.youtube.com/watch?v=DasB0di7iAw) along with opencv bindings and incudine to get some rms from the audio output of each nes voice.
