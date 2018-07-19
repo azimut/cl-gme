@@ -1,7 +1,7 @@
 (asdf:defsystem #:cl-gme
   :description "gme"
   :author "azimut <azimut.github@protonmail.com>"
-  :license "BSD-3"
+  :license "GPL-3.0"
   :serial t
   :depends-on (#:cffi)
   :components ((:file "package")
@@ -10,7 +10,7 @@
 (asdf:defsystem #:cl-gme/incudine
     :description "gme for incudine"
     :author "azimut"
-    :license "BSD-3"
+    :license "GPL-3.0"
     :serial t
     :depends-on (#:cl-gme)
     :components ((:file "contrib/gmeincudine")))
