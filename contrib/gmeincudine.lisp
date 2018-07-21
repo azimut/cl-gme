@@ -10,7 +10,7 @@
 (cffi:defcfun ("gmefile_to_buffer" gmefile-to-buffer) :void
   (buf :pointer)
   (gmefile :pointer)
-  (frames :unsigned-long))
+  (frames :unsigned-long)
+  (offset :unsigned-long))
 
 (load-foreign-library '(:default "gmeincudine"))
-
