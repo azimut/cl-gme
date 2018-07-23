@@ -332,7 +332,10 @@
   `(cffi:with-foreign-string (cffi-filename ,filename)
      (cffi:with-foreign-object (,var :pointer)
        (gme_open_file cffi-filename ,var ,rate)
-       (gme_start_track (mem-ref ,var :pointer) ,track)
+       ;; ensure we do try to listen more tracks than available ones
+       (let ((ntracks (gme_track_count (mem-ref ,var :pointer))))
+         (gme_start_track (mem-ref ,var :pointer) (min (1- ntracks) ,track)))
+       ;; mute voices when provided
        (when ,voices
          (let ((nvoices (gme_voice_count (mem-ref ,var :pointer))))
            (mapcar (lambda (v) (gme_mute_voice (cffi:mem-ref ,var :pointer) v 1))
