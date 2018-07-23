@@ -12,18 +12,18 @@ void gmefile_to_buffer(double *buf,
                        unsigned long frames,
                        unsigned long offset)
 {
-  short lbuf[4096];
+  short lbuf[4410];
   unsigned long i, j;
   
   // Skip forward
   if(offset>0){
-    gme_seek(gmefile, offset);
+    gme_seek_samples(gmefile, offset);
   }
   // Get these much frames
   for(i=0; i<frames; i++){
-    if((i % 4096) == 0){
-      gme_play(gmefile, 4096, lbuf);
-      for(j=i; j<(i + 4096); j++){
+    if((i % 4410) == 0){
+      gme_play(gmefile, 4410, lbuf);
+      for(j=i; j<(i + 4410); j++){
         buf[j] = (double)lbuf[j - i];
       }
     }
