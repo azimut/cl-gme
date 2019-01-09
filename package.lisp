@@ -2,6 +2,10 @@
     (:use #:cl #:cffi)
   (:export #:with-file
            #:with-track
+           #:track-count
+           #:track-info
+           #:voice-count
+           #:voice-names
            #:gme_clear_playlist
            #:gme_delete
            #:gme_enable_accuracy

@@ -9,44 +9,6 @@
 
 (defparameter *nsf-file-path* "/home/sendai/testfield/alien.nsf")
 
-(defun gmecount ()
-  "returns the number of tracks on file"
-  (with-open (ggme *nsf-file-path*)
-    (foreign-funcall "gme_track_count"
-                     :pointer (mem-ref ggme :pointer)
-                     :int)))
-
-(defun gmevoicecount ()
-  "number of voices available on the sound font"
-  (with-open (ggme *nsf-file-path*)
-    (foreign-funcall "gme_voice_count"
-                     :pointer (mem-ref ggme :pointer)
-                     :int)))
-
-(defun gmevoicename (&optional (voice 0))
-  "returns the string with the name of the voice"
-  (with-open (ggme *nsf-file-path*)
-    (foreign-funcall "gme_voice_name"
-                     :pointer (mem-ref ggme :pointer)
-                     :int voice :string)))
-
-(defun gmeinfo (&optional (tracknumber 1))
-  "FIXME: it should return the lenght of the track, but instead it returns an
-always increasing number if I do not close the tracker. Otherwise it returns
-always the same value"
-  (with-open (ggme *nsf-file-path*)
-    (with-foreign-object (info :pointer)
-      (foreign-funcall "gme_track_info"
-                       :pointer (mem-ref ggme :pointer)
-                       :pointer info
-                       :int tracknumber
-                       :pointer)
-      (with-foreign-slots ((length loop_length intro_length play_length)
-                           info (:struct gme_info_t))
-        (format t " Length: ~a ~%ILength: ~a ~%LLength: ~a ~%PLength: ~a"
-                length loop_length intro_length play_length))
-      (gme_free_info (mem-ref info :pointer)))))
-
 ;; trying with "small" chunks makes the playing reaaaaly slow
 ;; sometimes it works ok-ish, but really bad in comparison to big buffers
 ;; multiples of 44100
