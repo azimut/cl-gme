@@ -1,4 +1,4 @@
-(uiop:define-package cl-gme
+(uiop:define-package #:cl-gme
     (:use #:cl #:cffi)
   (:export #:with-file
            #:with-track
