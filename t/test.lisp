@@ -1,4 +1,4 @@
-(in-package :cl-gme)
+(in-package #:cl-gme)
 
 ;; Below are some example calls to the library, notice that are on
 ;; a nsf (nintendo sound font) file but it can be any other of the
