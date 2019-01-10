@@ -4,7 +4,8 @@
   :homepage "https://github.com/azimut/cl-gme"
   :license "GPL-3.0"
   :serial t
-  :depends-on (#:cffi)
+  :depends-on (#:cffi
+               #:alexandria)
   :components ((:file "package")
                (:file "cl-gme-cffi")
                (:file "cl-gme")))

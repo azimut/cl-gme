@@ -5,10 +5,11 @@
      :collect i))
 
 (defun comp-voices (voices nvoices)
-  (loop
-     :for i :in (indices nvoices)
-     :when (not (position i voices))
-     :collect i))
+  (let ((voices (remove-duplicates voices :test #'=)))
+    (loop
+       :for i :in (indices nvoices)
+       :when (not (position i voices))
+       :collect i)))
 
 (defmacro with-open ((var file &key (rate 44100)) &body body)
   "opens FILE and returns a file descriptor into VAR
@@ -29,7 +30,7 @@
   `(with-open (,var ,file :rate ,rate)
      ;; ensure we do try to listen more tracks than available ones
      (let ((ntracks (gme_track_count (mem-ref ,var :pointer))))
-       (gme_start_track (mem-ref ,var :pointer) (min (1- ntracks) ,track-number)))
+       (gme_start_track (mem-ref ,var :pointer) (alexandria:clamp ,track-number 0 (1- ntracks))))
      ;; mute voices when provided
      (when ,voices
        (let ((nvoices (gme_voice_count (mem-ref ,var :pointer))))
