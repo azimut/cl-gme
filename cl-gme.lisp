@@ -61,9 +61,6 @@
            (cons voice (gme_voice_name p voice))))))
 
 (defun track-info (file &optional (track-number 0))
-  "FIXME: it should return the lenght of the track, but instead it returns an
-always increasing number if I do not close the tracker. Otherwise it returns
-always the same value"  
   (declare (type string file))
   (with-open (ggme file)
     (with-foreign-object (info :pointer)
